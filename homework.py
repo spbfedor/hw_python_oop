@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 
 @dataclass
@@ -57,7 +57,8 @@ class Training:
         """Получить среднюю скорость движения."""
 
         return (
-            self.get_distance() / self.duration)
+            self.get_distance() / self.duration
+        )
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
@@ -193,10 +194,11 @@ def read_package(
 ) -> Training:
     """Прочитать данные полученные от датчиков."""
 
-    training_type: Dict[str, str] = {'SWM': Swimming,
-                                     'RUN': Running,
-                                     'WLK': SportsWalking
-                                     }
+    training_type: Dict[Tuple[float, ...], str] = {
+        'SWM': Swimming,
+        'RUN': Running,
+        'WLK': SportsWalking
+    }
     try:
         return training_type[workout_type](*data)
     except KeyError:
