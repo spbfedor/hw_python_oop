@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
 
 @dataclass
@@ -49,8 +49,8 @@ class Training:
 
         return (
             self.action
-            * Training.LEN_STEP
-            / Training.M_IN_KM
+            * self.LEN_STEP
+            / self.M_IN_KM
         )
 
     def get_mean_speed(self) -> float:
@@ -80,27 +80,27 @@ class Running(Training):
     """Тренировка: бег."""
 
     М_IN_H: int = 60
-    CONST_RUNN_1: int = 18
-    CONST_RUNN_2: int = 20
+    MULTIPLIER_FOR_RUNNING: int = 18
+    DEDUCTION_FOR_RUNNING: int = 20
 
     def get_spent_calories(self) -> float:
         """Рассчитываем каллории за тренировку."""
 
         return ((
-            Running.CONST_RUNN_1
+            self.MULTIPLIER_FOR_RUNNING
             * self.get_mean_speed()
-            - Running.CONST_RUNN_2)
-            * self.weight / Training.M_IN_KM
+            - self.DEDUCTION_FOR_RUNNING)
+            * self.weight / self.M_IN_KM
             * self.duration
-            * Running.М_IN_H
+            * self.М_IN_H
         )  # Рассчитываем калории.
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
 
-    CONST_WALK_1: float = 0.035
-    CONST_WALK_2: float = 0.029
+    BIGGER_MULTIPLIER_WALK: float = 0.035
+    SMALLER_MULTIPLIER_WALK: float = 0.029
 
     def __init__(
         self,
@@ -122,10 +122,10 @@ class SportsWalking(Training):
         """Рассчитываем каллории за тренировку."""
 
         return ((
-            SportsWalking.CONST_WALK_1
+            self.BIGGER_MULTIPLIER_WALK
             * self.weight
             + (self.get_mean_speed() ** 2 // self.height)
-            * SportsWalking.CONST_WALK_2
+            * self.SMALLER_MULTIPLIER_WALK
             * self.weight)
             * self.duration
             * Running.М_IN_H
@@ -136,8 +136,8 @@ class Swimming(Training):
     """Тренировка: плавание."""
 
     LEN_STEP: float = 1.38
-    CONST_SWIMM_1: float = 1.1
-    CONST_SWIMM_2: int = 2
+    SUMMAND_FOR_SWIMMING: float = 1.1
+    MULTIPLIER_FOR_SWIMMING: int = 2
 
     def __init__(
         self,
@@ -162,8 +162,8 @@ class Swimming(Training):
 
         return (
             self.action
-            * Swimming.LEN_STEP
-            / Training.M_IN_KM
+            * self.LEN_STEP
+            / self.M_IN_KM
         )  # Рассчитываем дистанцию.
 
     def get_mean_speed(self) -> float:
@@ -172,7 +172,7 @@ class Swimming(Training):
         return (
             self.length_pool
             * self.count_pool
-            / Training.M_IN_KM
+            / self.M_IN_KM
             / self.duration
         )
 
@@ -181,8 +181,8 @@ class Swimming(Training):
 
         return ((
             self.get_mean_speed()
-            + Swimming.CONST_SWIMM_1)
-            * Swimming.CONST_SWIMM_2
+            + self.SUMMAND_FOR_SWIMMING)
+            * self.MULTIPLIER_FOR_SWIMMING
             * self.weight
         )
 
@@ -193,10 +193,10 @@ def read_package(
 ) -> Training:
     """Прочитать данные полученные от датчиков."""
 
-    training_type = {'SWM': Swimming,
-                     'RUN': Running,
-                     'WLK': SportsWalking
-                     }
+    training_type: Dict[str, str] = {'SWM': Swimming,
+                                     'RUN': Running,
+                                     'WLK': SportsWalking
+                                     }
     try:
         return training_type[workout_type](*data)
     except KeyError:
