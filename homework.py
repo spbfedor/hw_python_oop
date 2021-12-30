@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
+from typing import Dict, List, Type, Union
 
 
 @dataclass
@@ -194,21 +194,21 @@ def read_package(
 ) -> Training:
     """Прочитать данные полученные от датчиков."""
 
-    training_type: Dict[Tuple[float, ...], str] = {
+    training_type: Dict[str, Type[Training]] = {
         'SWM': Swimming,
         'RUN': Running,
         'WLK': SportsWalking
     }
-    try:
-        return training_type[workout_type](*data)
-    except KeyError:
-        print('Несуществующие данные!')
+
+    if workout_type not in training_type.keys():
+        raise KeyError('Несуществующие данные')
+    return training_type[workout_type](*data)
 
 
-def main(training: Training) -> None:
+def main(training) -> None:
     """Главная функция."""
 
-    info: InfoMessage = training.show_training_info()
+    info: Union[InfoMessage, str] = training.show_training_info()
     print(info)
 
 
